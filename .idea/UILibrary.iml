@@ -6,11 +6,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/egl/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wayland_lib/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/wayland_lib/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/uilib/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/uilib/tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/egl/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
-      <excludeFolder url="file://$MODULE_DIR$/uilib/target" />
+      <excludeFolder url="file://$MODULE_DIR$/wayland_lib/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
