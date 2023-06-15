@@ -1,3 +1,4 @@
+use wayland_client::Proxy;
 
 pub mod registry;
 pub mod compositor;
@@ -11,430 +12,11 @@ pub mod region;
 pub mod buffer;
 pub mod shm_pool;
 pub mod touch;
-
-use std::cell::RefCell;
-use std::fs::File;
-use wayland_client::{Connection, delegate_dispatch, Dispatch, EventQueue, Proxy, QueueHandle, WEnum};
-use wayland_client::protocol::{wl_compositor::*,
-                               wl_display::*,
-                               wl_registry::*,
-                               wl_seat::*,
-                               wl_shm::*  ,
-                               wl_buffer:: * ,
-                               wl_keyboard::* ,
-                               wl_output::* ,
-                               wl_pointer::*,
-                               wl_shm_pool::*,
-                               wl_surface::* ,
-                               wl_touch::*
-};
-use wayland_client::protocol::*;
-use wayland_client::protocol::wl_region::WlRegion;
-use wayland_client::protocol::wl_surface::WlSurface;
-use wayland_client::protocol::wl_touch::WlTouch;
-use wayland_protocols::xdg::shell::client::{xdg_surface::*, xdg_toplevel::*, xdg_wm_base::*};
-use wayland_protocols::xdg::shell::client::*;
-use wayland_protocols::wp::presentation_time::client::* ;
-use wayland_protocols::wp::viewporter::client::* ;
-use wayland_protocols::wp::viewporter::client::wp_viewport::WpViewport;
-use wayland_protocols::wp::viewporter::client::wp_viewporter::WpViewporter;
-use std::collections::HashMap ;
-use std::ops::Deref;
-use std::sync::{Arc, Mutex};
-use wayland_backend::client::ObjectData;
-use crate::{delegate_compositor, delegate_output, delegate_registry, delegate_seat, delegate_shm};
-use crate::wayland::compositor::{Compositor, CompositorData};
-use crate::wayland::keyboard::{Keyboard, KeyboardData};
-use crate::wayland::output::{Output, OutputData};
-use crate::wayland::pointer::{Pointer, PointerData};
-use crate::wayland::region::{Region, RegionData};
-use crate::wayland::registry::{RegistryData, Registry,  };
-use crate::wayland::seat::{Seat, SeatData};
-use crate::wayland::shm::{Shm, ShmData};
-//use crate::wayland::application::Application;
-
 pub trait ProxyWrapper {
     type Target : Proxy +'static;
     fn get_proxy( &self) -> &Self::Target ;
     fn from_proxy( value : Self::Target ) ->  Self;
 }
-
-struct State {
-
-}
-struct RegistryState {
-
-}
-/*
-impl Dispatch<WlRegistry , RegistryData>  for  State   {
-    fn event(state: &mut Self, proxy: &WlRegistry, event: wl_registry::Event, data: &RegistryData, conn: &Connection, qhandle: &QueueHandle<State>) {
-        Registry::event( state , proxy, event, data, conn, qhandle )
-    }
-} */
-delegate_registry!(State);
-delegate_compositor!(State);
-delegate_shm!(State) ;
-delegate_seat!(State) ;
-delegate_output!(State) ;
-
-
-
-
-
-impl Dispatch<WlSurface, ()> for State {
-    fn event(state: &mut Self, proxy: &WlSurface, event: wl_surface::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            wl_surface::Event::Enter { output } => {
-
-            }
-            wl_surface::Event::Leave { output } => {
-                println!("Surface Leave")
-            }
-            _ => {}
-        }
-    }
-}
-
-impl Dispatch<WlRegion , RegionData > for State{
-    fn event(state: &mut Self, proxy: &WlRegion, event: wl_region::Event, data: &RegionData, conn: &Connection, qhandle: &QueueHandle<Self>) {
-        todo!()
-    }
-}
-
-
-impl Dispatch<WlKeyboard   , KeyboardData > for State{
-    fn event(state: &mut Self, proxy: &WlKeyboard, event: wl_keyboard::Event, data: &KeyboardData, conn: &Connection, qhandle: &QueueHandle<Self>) {
-
-    }
-}
-
-impl Dispatch<WlPointer, PointerData >  for State{
-    fn event(state: &mut Self, proxy: &WlPointer, event: wl_pointer::Event, data: &PointerData, conn: &Connection, qhandle: &QueueHandle<Self>) {
-
-    }
-}
-
-
-
-
-
-/*
-fn draw(tmp: &mut File, (buf_x, buf_y): (u32, u32)) {
-    use std::{cmp::min, io::Write};
-    /* let mut buf = std::io::BufWriter::new(tmp);
-    for y in 0..buf_y {
-        for x in 0..buf_x {
-            let a = 0xFF;
-            let r = min(((buf_x - x) * 0xFF) / buf_x, ((buf_y - y) * 0xFF) / buf_y);
-            let g = min((x * 0xFF) / buf_x, ((buf_y - y) * 0xFF) / buf_y);
-            let b = min(((buf_x - x) * 0xFF) / buf_x, (y * 0xFF) / buf_y);
-
-            let color = (a << 24) + (r << 16) + (g << 8) + b;
-            buf.write_all(&color.to_ne_bytes()).unwrap();
-        }
-    }
-    buf.flush().unwrap(); */
-}
-
-
-
-
-impl Dispatch<WlSurface, ()> for State {
-    fn event(state: &mut Self, proxy: &WlSurface, event: wl_surface::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            wl_surface::Event::Enter { output } => {
-
-            }
-            wl_surface::Event::Leave { output } => {
-                println!("Surface Leave")
-            }
-            _ => {}
-        }
-    }
-}
-
-impl Dispatch<WlShm, ()> for State {
-    fn event(state: &mut Self, proxy: &WlShm, event: wl_shm::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            wl_shm::Event::Format { format } => {
-                match format  {
-                    WEnum::Value(_) => {}
-                    WEnum::Unknown(_) => {}
-                }
-            }
-            _ => {}
-        }
-    }
-}
-
-
-impl Dispatch<WlShmPool, ()> for State {
-    fn event(state: &mut Self, proxy: &WlShmPool, event: wl_shm_pool::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            _ => todo!(),
-
-        }
-    }
-}
-
-impl Dispatch<WlBuffer, ()> for State {
-    fn event(state: &mut Self, proxy: &WlBuffer, event: wl_buffer::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            wl_buffer::Event::Release => { }
-            _ => {}
-        }
-    }
-}
-struct A {
-
-}
-
-
-impl Dispatch<WlKeyboard , () > for State {
-    fn event(state: &mut Self, proxy: &WlKeyboard, event: wl_keyboard::Event, data: &() , conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            wl_keyboard::Event::Keymap { format, fd, size } => {
-                println!("KeyBoard Keymap  size {} " , size)
-            }
-            wl_keyboard::Event::Enter { serial, surface, keys } => {
-
-            }
-            wl_keyboard::Event::Leave { serial, surface } => {
-                println!("KeyBoard Leave {}" , serial)
-            }
-            wl_keyboard::Event::Key { serial, time, key, state } => {
-                println!("KeyBoard key { }  time : {} , serial : {}" , key , time , serial ) ;
-            }
-            wl_keyboard::Event::Modifiers { serial, mods_depressed, mods_latched, mods_locked, group } => {
-                println!("Keyboard Modifiers  serial :{} , mod_depressed {} , mods_latched {}, mod_lode {} , group {}" , serial , mods_depressed , mods_latched , mods_latched  , group)
-            }
-            wl_keyboard::Event::RepeatInfo { rate, delay } => {
-                println!("repeatInfo  rate : {} , delay {}" , rate  , delay )
-            }
-            _ => {
-
-            }
-        }
-    }
-}
-
-
-
-impl Dispatch<WlPointer , () > for State {
-    fn event(state: &mut Self, proxy: &WlPointer, event: wl_pointer::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event  {
-            wl_pointer::Event::Enter { serial, surface, surface_x, surface_y } => {
-                println!("Pointer Enter ,serial : {} ,  surface_x : {} , surface_y  : {}  " , serial , surface_x , surface_y  )
-
-            }
-            wl_pointer::Event::Leave { serial, surface } => {
-                println!("Pointer Leave serial : {}"  , serial)
-            }
-            wl_pointer::Event::Motion { time, surface_x, surface_y } => {
-                println!("Pointer Motion  time {} , surface_x {} surface_y {}" , time , surface_x , surface_x  )
-            }
-            wl_pointer::Event::Button { serial, time, button, state } => {
-                let  state = match state.into_result().unwrap() {
-                    ButtonState::Released => {"is_released"}
-                    ButtonState::Pressed => {"is_pressed"}
-                    _=> { "error "}
-                } ;
-                println!( "Pointer Button   serial {} , time  {} button {}  state {}  "  , serial , time , button , state   )
-
-            }
-            wl_pointer::Event::Axis { time, axis, value } => {}
-            wl_pointer::Event::Frame => {
-                println!("Pointer  Frame")
-            }
-            wl_pointer::Event::AxisSource { axis_source } => {}
-            wl_pointer::Event::AxisStop { time, axis } => {}
-            wl_pointer::Event::AxisDiscrete { axis, discrete } => {}
-            wl_pointer::Event::AxisValue120 { axis, value120 } => {}
-            _ => {}
-        }
-    }
-}
-
-impl Dispatch<WlTouch, ()> for State {
-    fn event(state: &mut Self, proxy: &WlTouch, event: wl_touch::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            wl_touch::Event::Down { serial, time, surface, id, x, y } => {
-                //   println!("Touch Down serial : {} , time  {} , id : {} , x :{} , y :{} " ,  serial ,  time , id , x ,y  )
-            }
-            wl_touch::Event::Up { serial, time, id } => {}
-            wl_touch::Event::Motion { time, id, x, y } => {}
-            wl_touch::Event::Frame => {}
-            wl_touch::Event::Cancel => {}
-            wl_touch::Event::Shape { id, major, minor } => {}
-            wl_touch::Event::Orientation { id, orientation } => {}
-            _ => {}
-        }
-    }
-}
-
-
-
-impl Dispatch< WlOutput, () > for State{
-    fn event(state: &mut Self, proxy: &WlOutput, event: wl_output::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            wl_output::Event::Geometry { x, y, physical_width, physical_height, subpixel, make, model, transform } => {
-
-                match subpixel.into_result().unwrap() {
-                    Subpixel::Unknown => {}
-                    Subpixel::None => {}
-                    Subpixel::HorizontalRgb => {}
-                    Subpixel::HorizontalBgr => {}
-                    Subpixel::VerticalRgb => {}
-                    Subpixel::VerticalBgr => {}
-                    _ => {}
-                }
-                match  transform.into_result().unwrap()  {
-                    Transform::Normal => {}
-                    Transform::_90 => {}
-                    Transform::_180 => {}
-                    Transform::_270 => {}
-                    Transform::Flipped => {}
-                    Transform::Flipped90 => {}
-                    Transform::Flipped180 => {}
-                    Transform::Flipped270 => {}
-                    _ => {}
-                }
-                println!("Output Geometry x {}  y {}  physical_width {} physical_height {} , " , x ,y ,physical_width , physical_height )
-
-            }
-            wl_output::Event::Mode { flags, width, height, refresh } => {
-                println!("Output Mode width :{} ; height {} refresh {}" , width , height , refresh) ;
-                let a = flags.into_result().unwrap()  ;
-
-                match flags.into_result().unwrap() {
-                    Mode { .. } => {
-
-                    }
-                }
-            }
-            wl_output::Event::Done => { println!(
-                "Output Done"
-            )}
-            wl_output::Event::Scale { factor } => {
-                println!( "Output Scale {}" ,   factor)
-            }
-            wl_output::Event::Name { name } => {println!("Output Name : {}" , name )}
-            wl_output::Event::Description { description } => {  println!("Output  Description {}" , description )}
-            _ => {}
-        }
-    }
-}
-
-
-impl Dispatch<XdgWmBase, ()> for State {
-    fn event(state: &mut Self, proxy: &XdgWmBase, event: xdg_wm_base::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            xdg_wm_base::Event::Ping { serial } => {
-                println!("Xdg_wm_base serial {}" , serial) ;
-                proxy.pong(serial);
-            }
-            _ => { }
-        }
-
-    }
-}
-
-impl Dispatch<XdgSurface ,()> for State {
-    fn event(state: &mut Self, proxy: &XdgSurface, event: xdg_surface::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event  {
-            xdg_surface::Event::Configure { serial } => {
-                println!("Xdg_surface Configure serial {}" , serial) ;
-                proxy.ack_configure(serial);
-            }
-            _ => {
-
-            }
-        } ;
-    }
-}
-
-impl Dispatch<XdgToplevel, ()> for State {
-    fn event(state: &mut Self, proxy: &XdgToplevel, event: xdg_toplevel::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-        match event {
-            xdg_toplevel::Event::Configure { width, height, states } => {
-                println!("XdgToplevel Configure width {} height {} " , width , height )
-            }
-            xdg_toplevel::Event::Close => {
-                println!("XdgToplevel Destroy") ;
-                proxy.destroy() ;
-                //state.running  = false
-            }
-            xdg_toplevel::Event::ConfigureBounds { width, height } => {
-                println!("XdgToplevel ConfigureBound  width {}  height {}" , width ,height )
-            }
-            xdg_toplevel::Event::WmCapabilities { capabilities } => {
-                println!("XdgToplevel WmCapabilities")
-            }
-            _ => {
-
-            }
-        }
-    }
-}
-
-impl Dispatch<WpViewporter , ()> for State {
-    fn event(state: &mut Self, proxy: &WpViewporter, event: wp_viewporter::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-    }
-}
-impl Dispatch<WpViewport, ()> for State {
-    fn event(state: &mut Self, proxy: &WpViewport, event: wp_viewport::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-
-    }
-}
-
-impl Dispatch<WlRegion, ()> for State {
-    fn event(state: &mut Self, proxy: &WlRegion, event: wl_region::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
-
-    }
-} */
-
-
-/*
-impl State {
-    fn new(& mut  self , q_handle : &QueueHandle<State>) {
-/*
-        let mut file = tempfile::tempfile().unwrap();
-        let shm = self.shm.as_ref().unwrap() ;
-        let (w, h) = (300, 300);
-        draw(&mut file, (w, h));
-        let pool = shm.create_pool(file.as_raw_fd(), (w * h * 4) as i32, q_handle, ());
-        let buffer = pool.create_buffer(0, (w) as i32, h as i32, (w as i32) * 4,
-                                        wl_shm::Format::Argb8888, &q_handle, ());
-        self.ee (  & buffer , q_handle  ) ; */
-    }
-
-
-
-
-    fn ee (& self  , buffer : &WlBuffer    , q_handle :  &QueueHandle<State>){
-       /* let compositor  =  self.compositor.as_ref().unwrap() ;
-        let surface = compositor.create_surface(q_handle , () );
-        let xdg_surface = self.xdg_wm_base.as_ref().unwrap().get_xdg_surface(  &surface   ,  q_handle, () ) ;
-        surface.id() ;
-        let xdg_toplevel = xdg_surface.get_toplevel(q_handle , ()) ;
-        xdg_toplevel.set_title("title".to_string()  ) ;
-        xdg_toplevel.set_maximized() ;
-
-        /* let a = compositor.create_region(q_handle ,  () ) ;
-         a.add(100 , 100 , 100 , 100) ;
-
-         surface.set_input_region(Some( &a )) ; */
-        surface.attach(Some(&buffer.clone()), 0, 0);
-
-        surface.commit() ;
-
-
-
-        let wl_viewporter = self.wp_viewport.as_ref().unwrap() ;
-        wl_viewporter.get_viewport( &surface ,  q_handle , ()  ) ; */
-
-    }
-} */
 
 #[cfg(test)]
 mod test {
@@ -444,21 +26,221 @@ mod test {
     use std::rc::Rc;
     use std::thread;
     use std::thread::Thread;
-    use wayland_client::{Connection, EventQueue};
-    use wayland_client::protocol::wl_compositor::WlCompositor;
     use crate::wayland::compositor::{Compositor, CompositorData};
-    use crate::wayland::keyboard::Keyboard;
-    use crate::wayland::output::{Output, OutputData};
+    use crate::wayland::keyboard::{Keyboard, KeyboardData};
+    use crate::wayland::output::{Output, OutputData, OutputHandler};
     use crate::wayland::registry::Registry;
     use crate::wayland::seat::Seat;
-    use crate::wayland::{RegistryState, State};
+
     use crate::wayland::pointer::PointerData;
     use crate::wayland::shm::Shm;
+
+
+    use std::cell::RefCell;
+    use std::fs::File;
+    use std::os::fd::AsRawFd;
+    use wayland_client::{Connection, delegate_dispatch, Dispatch, EventQueue, Proxy, QueueHandle, WEnum};
+    use wayland_client::protocol::{wl_compositor::*,
+                                   wl_display::*,
+                                   wl_registry::*,
+                                   wl_seat::*,
+                                   wl_shm::*  ,
+                                   wl_buffer:: * ,
+                                   wl_keyboard::* ,
+                                   wl_output::* ,
+                                   wl_pointer::*,
+                                   wl_shm_pool::*,
+                                   wl_surface::* ,
+                                   wl_touch::*
+    };
+    use wayland_client::protocol::*;
+    use wayland_client::protocol::wl_region::WlRegion;
+    use wayland_client::protocol::wl_surface::WlSurface;
+    use wayland_client::protocol::wl_touch::WlTouch;
+    use wayland_protocols::xdg::shell::client::{xdg_surface::*, xdg_toplevel::*, xdg_wm_base::*};
+    use wayland_protocols::xdg::shell::client::*;
+    use wayland_protocols::wp::presentation_time::client::* ;
+    use wayland_protocols::wp::viewporter::client::* ;
+    use wayland_protocols::wp::viewporter::client::wp_viewport::WpViewport;
+    use wayland_protocols::wp::viewporter::client::wp_viewporter::WpViewporter;
+    use std::sync::{Arc, Mutex};
+    use wayland_backend::client::ObjectData;
+    use wayland_client::protocol::wl_registry::Request::Bind;
+    use crate::{delegate_wl_buffer, delegate_wl_compositor, delegate_wl_keyboard, delegate_wl_output, delegate_wl_pointer, delegate_wl_registry, delegate_wl_seat, delegate_wl_shm, delegate_wl_shm_pool, delegate_wl_surface, delegate_xdg_surface, delegate_xdg_toplevel, delegate_xdg_wm_base, xdg};
+    use crate::wayland::ProxyWrapper;
+    use crate::wayland::region::RegionData;
+    use crate::wayland::shm_pool::ShmPool;
+    use crate::wayland::surface::SurfaceHandler;
+    use crate::xdg::toplevel::ToplevelData;
+    use crate::xdg::wm_base::{WmBase, WmBaseHandler};
+
+//use crate::wayland::application::Application;
+
+
+
+    struct State {
+        is_closed: bool
+    }
+
+    impl WmBaseHandler for State {
+        fn ping(&mut self, serial: u32, conn: &Connection, queue_handle: &QueueHandle<Self>)  {
+
+        }
+    }
+
+    impl xdg::surface::SurfaceHandler for State{
+        fn configure(&mut self, serial: u32, conn: &Connection, queue: &QueueHandle<Self>) where Self: Sized {
+
+        }
+    }
+
+    impl xdg::toplevel::ToplevelHandler for State {
+        fn configure(&mut self, width: i32, height: i32, state: Vec<u8>, conn: &Connection, queue_handle: &QueueHandle<Self>) where Self: Sized {
+            println!("Toplevel Configure  width  : {}  ,height {}  , state {:?}" , width , height , state)
+        }
+
+        fn close(&mut self, conn: &Connection, queue_handle: &QueueHandle<Self>) where Self: Sized {
+            self.is_closed =true ;
+            println!("Toplevel close");
+        }
+
+        fn configure_bound(&mut self, width: i32, height: i32, conn: &Connection, queue_handle: &QueueHandle<Self>) where Self: Sized {
+            println!("Toplevel Configure bound width : {} , height {}" , width ,height  )
+        }
+
+        fn wm_capabilities(&mut self, capabilities: Vec<u8>, conn: &Connection, queue_handle: &QueueHandle<Self>) where Self: Sized {
+            println!("Toplevel wm_capabilities  {:?} " ,  capabilities)
+        }
+    }
+
+    impl SurfaceHandler for State {
+        fn enter(& mut self, connection: &Connection, queue_handler: &QueueHandle<Self>) {
+            println!("Surface enter")
+        }
+
+        fn leave(& mut self, connection: &Connection, queue_handler: &QueueHandle<Self>) {
+            println!("Surface leave")
+        }
+    }
+
+    impl OutputHandler for State {
+        fn geometry(&mut self, x: i32, y: i32, physical_width: i32, physical_height: i32, subpixel: Subpixel, make: String, model: String, transform: Transform, conn: &Connection, q_handle: &QueueHandle<Self>) where Self: Sized {
+            println!("Output geometry  x : {}  , y : {} physical_width  : {} physical_height: {} , subpixel : {:?} , make : {}  , mode : {}  transform  :{:?}"  , x ,  y , physical_width , physical_height , subpixel   , make , model  ,transform)
+        }
+
+        fn mode(&mut self, is_current: bool, is_preferred: bool, width: i32, height: i32, refresh: i32, conn: &Connection, q_handle: &QueueHandle<Self>) where Self: Sized {
+            println!( "Output mode is_current : {} , is_preferred : {} , width : {} , height : {} ,refresh : {}"  , is_current , is_preferred , width , height ,refresh  )
+        }
+
+        fn done(&mut self, conn: &Connection, q_handle: &QueueHandle<Self>) where Self: Sized {
+            println!("Output done ")
+        }
+
+        fn scale(&mut self, factor: i32, conn: &Connection, q_handle: &QueueHandle<Self>) where Self: Sized {
+            println!( "Output scale  factor : {} "  , factor )
+        }
+
+        fn name(&mut self, name: String, conn: &Connection, q_handle: &QueueHandle<Self>) where Self: Sized {
+            println!( "Output name  : {} "  , name )
+        }
+
+        fn description(&mut self, description: String, conn: &Connection, q_handle: &QueueHandle<Self>) where Self: Sized {
+            println!( "Output description , {}" ,  description )
+        }
+    }
+    delegate_wl_registry!(State);
+    delegate_wl_compositor!(State);
+    delegate_wl_shm!(State);
+    delegate_wl_surface!(State) ;
+    delegate_wl_seat!(State);
+    delegate_wl_output!(State) ;
+    delegate_wl_keyboard!(State);
+    delegate_wl_pointer!(State);
+    delegate_wl_buffer!(State);
+    delegate_wl_shm_pool!(State);
+    delegate_xdg_wm_base!(State);
+    delegate_xdg_surface!(State);
+    delegate_xdg_toplevel!(State) ;
+
+
+
+
+
+
+
+
+    /*
+
+
+
+
+    impl Dispatch<WlSurface, ()> for State {
+        fn event(state: &mut Self, proxy: &WlSurface, event: wl_surface::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
+            match event {
+                wl_surface::Event::Enter { output } => {
+
+                }
+                wl_surface::Event::Leave { output } => {
+                    println!("Surface Leave")
+                }
+                _ => {}
+            }
+        }
+    }
+
+    impl Dispatch<WlShm, ()> for State {
+        fn event(state: &mut Self, proxy: &WlShm, event: wl_shm::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
+            match event {
+                wl_shm::Event::Format { format } => {
+                    match format  {
+                        WEnum::Value(_) => {}
+                        WEnum::Unknown(_) => {}
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+
+    impl Dispatch<WlShmPool, ()> for State {
+        fn event(state: &mut Self, proxy: &WlShmPool, event: wl_shm_pool::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
+            match event {
+                _ => ,
+
+            }
+        }
+    }
+
+    impl Dispatch<WlBuffer, ()> for State {
+        fn event(state: &mut Self, proxy: &WlBuffer, event: wl_buffer::Event, data: &(), conn: &Connection, qhandle: &QueueHandle<Self>) {
+            match event {
+                wl_buffer::Event::Release => { }
+                _ => {}
+            }
+        }
+    } */
 
 
     #[test]
     fn ee( ){
 
+    }
+    fn draw(tmp: &mut File, (buf_x, buf_y): (u32, u32)) {
+        use std::{cmp::min, io::Write};
+         let mut buf = std::io::BufWriter::new(tmp);
+        for y in 0..buf_y {
+            for x in 0..buf_x {
+                let a = 0xFF;
+                let r = min(((buf_x - x) * 0xFF) / buf_x, ((buf_y - y) * 0xFF) / buf_y);
+                let g = min((x * 0xFF) / buf_x, ((buf_y - y) * 0xFF) / buf_y);
+                let b = min(((buf_x - x) * 0xFF) / buf_x, (y * 0xFF) / buf_y);
+
+                let color = (a << 24) + (r << 16) + (g << 8) + b;
+                buf.write_all(&color.to_ne_bytes()).unwrap();
+            }
+        }
+        buf.flush().unwrap();
     }
 
 
@@ -466,29 +248,58 @@ mod test {
     fn test_wayland (){
         let connection = Connection::connect_to_env().unwrap() ;
         let mut event_queue =  connection.new_event_queue::<State>();
-        let mut event_queue  = connection.new_event_queue::<State>();
+        //let mut event_queue  = connection.new_event_queue::<State>();
         let queue_handle  = event_queue.handle() ;
-        let queue_handle  = event_queue.handle()  ;
-        let mut state =  State{ } ;
+        //let queue_handle  = event_queue.handle()  ;
+        let mut state =  State{ is_closed: false } ;
         let registry = Registry::new(&connection, &event_queue.handle()    ) ;
-        // let registry = display.get_registry( queue_handle  , ()  );
-        let a  = thread::spawn(move |  |{
-            event_queue.roundtrip( &mut state ).unwrap() ;
-        }) ;
-
-
-        let x = Compositor::new(&registry, &queue_handle,    ).unwrap();
+        //let a  = thread::spawn(move |  |{}) ;
+        event_queue.roundtrip( &mut state ).unwrap() ;
+        let compositor  = Compositor::new(&registry, &queue_handle,    ).unwrap();
         let seat = Seat::new(&registry, &queue_handle ).unwrap() ;
-        let shm =  Shm::new(&registry, &queue_handle );
+        let shm =  Shm::new(&registry, &queue_handle ).unwrap();
         let output = Output::new(&registry, &queue_handle ).unwrap() ;
-        seat.get_pointer(&queue_handle ,    PointerData{} ).unwrap() ;
-        //a.join().unwrap()
+        let wm_base = WmBase::new(&registry  , &queue_handle).unwrap() ;
+        event_queue.roundtrip( &mut state ).unwrap() ;
+
+        let surface= compositor.create_surface( &queue_handle , ) ;
+        let xdg_surface = wm_base.get_surface(  &surface   ,  &queue_handle, ) ;
+        let xdg_toplevel = xdg_surface.get_toplevel(&queue_handle ) ;
+        xdg_toplevel.set_title("title".to_string()  ) ;
+        //xdg_toplevel.set_maximized() ;
+        let mut file = tempfile::tempfile().unwrap();
+        let (w, h) = (300, 300);
+        draw(&mut file, (w, h));
+        let pool = shm.create_pool(file, (w * h * 4) as i32, &queue_handle  );
+        let buffer = pool.create(0, (w) as i32, h as i32, (w as i32) * 4,
+                                 wl_shm::Format::Argb8888, &queue_handle).unwrap() ;
+            // surface.set_input_region(Some( &a )) ;
+        surface.attach(Some(&buffer), 0, 0);
+        surface.commit() ;
 
 
 
+        let mut file = tempfile::tempfile().unwrap();
+        let (w, h) = (300, 300);
+        draw(&mut file, (w, h));
+        let pool = shm.create_pool(file, (w * h * 4) as i32, &queue_handle  );
+        let buffer = pool.create(0, (w) as i32, h as i32, (w as i32) * 4,
+                                 wl_shm::Format::Argb8888, &queue_handle).unwrap() ;
 
+        surface.commit() ;
+        let keyboard = seat.get_keyboard(&queue_handle ,  KeyboardData::new()  ).unwrap() ;
+        //let keyboard2 = seat.get_keyboard(&queue_handle ,  KeyboardData::new()  ).unwrap() ;
+        let pointer =  seat.get_pointer(&queue_handle , PointerData{} ).unwrap();
 
+        thread::spawn(move ||{
+            loop {
+                if state.is_closed {
+                    break
+                }
+                event_queue.roundtrip (&mut state).unwrap();
+            }
 
+        }).join().unwrap()
 
 
 

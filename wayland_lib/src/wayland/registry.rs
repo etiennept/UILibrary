@@ -16,7 +16,7 @@ use wayland_client::protocol::wl_registry::WlRegistry;
 use wayland_protocols::xdg::shell::client::xdg_toplevel::State;
 use crate::proxy;
 
-use crate::wayland::{     ProxyWrapper, RegistryState};
+use crate::wayland::{     ProxyWrapper };
 
 
 //delegate_dispatch!( RegistryState :[wl ])
@@ -51,7 +51,7 @@ impl RegistryData {
 
 
 #[macro_export]
-macro_rules! delegate_registry   {
+macro_rules! delegate_wl_registry {
     ( $name:ident   ) => {
         wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_registry::WlRegistry : $crate::wayland::registry::RegistryData ]=>$crate::wayland::registry::Registry) ;
     };
@@ -80,6 +80,7 @@ impl < T : Dispatch<WlRegistry , RegistryData>   >Dispatch< WlRegistry, Registry
     fn event(state: &mut T , proxy: &WlRegistry, event: wl_registry::Event, data: &RegistryData, conn: &Connection, q_handle: &QueueHandle<T >) {
         match event {
             wl_registry::Event::Global { name, interface, version } => {
+
                 data.insert(name , interface ,  version);
             }
             wl_registry::Event::GlobalRemove { name } => {

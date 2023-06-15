@@ -6,7 +6,13 @@ use crate::wayland::ProxyWrapper;
 
 proxy!( Touch  , WlTouch  ) ;
 
-pub struct TouchData  ;
+pub struct TouchData {}
+
+impl TouchData {
+    pub(crate) fn new ( ) -> Self {
+        TouchData{ }
+    }
+}
 
 impl <T : Dispatch<WlTouch ,  TouchData > > Dispatch<WlTouch ,  TouchData  , T  >  for Touch {
     fn event(state: &mut T, proxy: &WlTouch, event: wl_touch::Event, data: &TouchData, conn: &Connection, qhandle: &QueueHandle<T>) {
@@ -15,7 +21,7 @@ impl <T : Dispatch<WlTouch ,  TouchData > > Dispatch<WlTouch ,  TouchData  , T  
 }
 
 #[macro_export]
-macro_rules! delegate_touch   {
+macro_rules! delegate_wl_touch   {
     ( $name:ident   ) => {
         wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_touch::WlTouch : $crate::wayland::touch::TouchData ]=>$crate::wayland::touch::Touch) ;
     };

@@ -11,11 +11,11 @@ use wayland_client::protocol::wl_seat::{Capability, WlSeat};
 use wayland_client::protocol::wl_touch::WlTouch;
 use crate::proxy;
 use crate::wayland::keyboard::Keyboard;
-use crate::wayland::pointer::Pointer;
+use crate::wayland::pointer::{Pointer, PointerData};
 use crate::wayland::registry::Registry;
 use crate::wayland::seat::SeatError::NotImpl;
-use crate::wayland::State;
-use crate::wayland::touch::Touch;
+
+use crate::wayland::touch::{Touch, TouchData};
 use crate::wayland::ProxyWrapper;
 
 proxy!(Seat , WlSeat ) ;
@@ -60,10 +60,10 @@ impl Error for SeatError{
 }
 
 macro_rules! seat_impl {
-    ( $name:ident , $ty:ident,  $wl_ty:ty, $data_name:ident  ) => {
-        pub fn $name < D : Send +Sync +'static , T : Dispatch< $wl_ty  ,D>+'static   >(&self , qt : &QueueHandle<T> ,  data : D  ) ->  Result<$ ty , SeatError>{
-            if self.ptr.data::<SeatData>().unwrap().contain.lock().unwrap().$data_name  {
-                Ok( $ty::from_proxy( self.ptr.$name (qt  , data)  )  )
+    ( $name:ident , $ty:ident,  $wl_ty:ty,  $data_name:ident    ,  $arg_data_name:ident  ) => {
+        pub fn $name < T : Dispatch< $wl_ty  , $data_name   >+'static   >(&self , qt : &QueueHandle<T> ,    ) ->  Result<$ ty , SeatError>{
+            if self.ptr.data::<SeatData>().unwrap().contain.lock().unwrap().$arg_data_name {
+                Ok( $ty::from_proxy( self.ptr.$name (qt  ,  $data::new() )  )  )
             }else {
                 Err(NotImpl)
             }
@@ -71,7 +71,7 @@ macro_rules! seat_impl {
 }
 
 #[macro_export]
-macro_rules! delegate_seat  {
+macro_rules! delegate_wl_seat{
     ( $name:ident   ) => {
         wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_seat::WlSeat : $crate::wayland::seat::SeatData]=>$crate::wayland::seat::Seat) ;
     };
@@ -80,11 +80,9 @@ impl Seat {
     pub fn new < T : Dispatch<WlSeat, SeatData> + 'static> (registry : &Registry, qh : &QueueHandle<T > ) -> Result<Seat, BindError> {
         registry.bind( qh,   SeatData::new()    )
     }
-
-
-    seat_impl!(get_keyboard , Keyboard, WlKeyboard , keyboard     ) ;
-    seat_impl!(get_pointer,  Pointer , WlPointer , pointer  ) ;
-    seat_impl!(get_touch,  Touch ,WlTouch , touch ) ;
+    seat_impl!(get_keyboard , Keyboard, WlKeyboard , KeyboardData   ,  keyboard     ) ;
+    seat_impl!(get_pointer, Pointer , WlPointer , PointerData,   pointer  ) ;
+    seat_impl!(get_touch, Touch ,WlTouch , TouchData , touch ) ;
 }
 
 impl <T : Dispatch<WlSeat ,SeatData  >>  Dispatch<WlSeat, SeatData , T  > for Seat {
@@ -93,7 +91,7 @@ impl <T : Dispatch<WlSeat ,SeatData  >>  Dispatch<WlSeat, SeatData , T  > for Se
         match event {
 
             wl_seat::Event::Capabilities { capabilities } => {
-                println!("capabilities") ;
+                //println!("capabilities") ;
                 let mut data = data.contain.lock().unwrap();
                 let capabilities = capabilities.into_result().unwrap() ;
                 data.keyboard = capabilities.contains(  Capability::Keyboard  )  ;

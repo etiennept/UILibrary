@@ -7,13 +7,14 @@ proxy!(Region , WlRegion) ;
 
 pub struct RegionData ;
 
-impl <T: Dispatch<WlRegion , RegionData >> Dispatch<WlRegion, RegionData , T > for Region {
+impl <T : Dispatch<WlRegion , RegionData> > Dispatch<WlRegion, RegionData , T > for Region {
     fn event(state: &mut T , proxy: &WlRegion, event: wl_region::Event, data: &RegionData, conn: &Connection, qhandle: &QueueHandle<T >) {
-        todo!()
+
     }
 }
+
 #[macro_export]
-macro_rules! delegate_region {
+macro_rules! delegate_wl_region {
     ( $name:ident   ) => {
         wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_region::WlRegion : $crate::wayland::region::RegionData ]=>$crate::wayland::region::Region) ;
     };

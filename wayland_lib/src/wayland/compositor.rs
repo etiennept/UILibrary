@@ -31,16 +31,18 @@ impl Compositor{
         registry.bind::<Compositor, CompositorData, T > (qt,CompositorData{})
     }
     pub fn create_surface<  T : Dispatch< WlSurface , SurfaceData  >  +'static> (&self, qh : &QueueHandle<T  >, ) -> Surface {
-        Surface::from_proxy(self.get_proxy().create_surface(qh,SurfaceData {}  )  )
+        //log::
+
+        Surface::from_proxy(self.ptr.create_surface(qh,SurfaceData {}  )  )
     }
     pub fn create_region<  T : Dispatch <WlRegion , RegionData>+'static >(&self, qh : &QueueHandle<T >,  ) -> Region {
-       Region::from_proxy(self.get_proxy().create_region( qh, RegionData {}  ) )
+       Region::from_proxy(self.ptr.create_region( qh, RegionData {}  ) )
     }
 
 }
 
 #[macro_export]
-macro_rules! delegate_compositor  {
+macro_rules! delegate_wl_compositor {
     ( $name:ident   ) => {
         wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_compositor::WlCompositor : $crate::wayland::compositor::CompositorData]=>$crate::wayland::compositor::Compositor) ;
     };

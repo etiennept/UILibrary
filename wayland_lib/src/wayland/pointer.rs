@@ -24,6 +24,17 @@ pub struct PointerData{
     
 }
 
+impl PointerData {
+    pub(crate) fn new () -> Self {
+        PointerData{
+
+        }
+    }
+
+}
+
+
+
 impl <T : Dispatch<WlPointer, PointerData> > Dispatch<WlPointer, PointerData , T > for Pointer {
     fn event(state: &mut T , proxy: &WlPointer, event: wl_pointer::Event, data: &PointerData, conn: &Connection, qhandle: &QueueHandle<T>) {
         match event  {
@@ -42,8 +53,8 @@ impl <T : Dispatch<WlPointer, PointerData> > Dispatch<WlPointer, PointerData , T
     }
 }
 #[macro_export]
-macro_rules! delegate_pointer   {
+macro_rules! delegate_wl_pointer   {
     ( $name:ident   ) => {
-        wayland_client::delegate_pointer!( $name : [ wayland_client::protocol::wl_pointer::WlPointer : $crate::wayland::pointer::PointerData ]=>$crate::wayland::pointer::Pointer) ;
+        wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_pointer::WlPointer : $crate::wayland::pointer::PointerData ]=>$crate::wayland::pointer::Pointer) ;
     };
 }

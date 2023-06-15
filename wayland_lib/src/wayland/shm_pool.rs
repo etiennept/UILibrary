@@ -31,10 +31,6 @@ impl Error for ShmPoulError {
 
 }
 
-
-
-
-
 impl ShmPool{
     pub fn create <T : Dispatch<WlBuffer , BufferData  > + 'static> (&self, offset :i32, width :i32, height :i32, stride :i32, format : Format, qt : &QueueHandle<T >   ) -> Result<Buffer, ShmPoulError> {
         let formats = &self.ptr.data::<ShmPoolData>().unwrap ().format ;
@@ -54,12 +50,13 @@ pub struct ShmPoolData{
 }
 impl <T : Dispatch<WlShmPool , ShmPoolData> > Dispatch<WlShmPool, ShmPoolData , T  > for  ShmPool {
     fn event(state: &mut T, proxy: &WlShmPool, event: wl_shm_pool::Event, data: &ShmPoolData, conn: &Connection, qhandle: &QueueHandle<T>) {
+
         todo!()
     }
 }
 
 #[macro_export]
-macro_rules! delegate_shm_pool  {
+macro_rules! delegate_wl_shm_pool {
     ( $name:ident   ) => {
         wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_shm_pool::WlShmPool : $crate::wayland::shm_pool::ShmPoolData ]=>$crate::wayland::shm_pool::ShmPool) ;
     };

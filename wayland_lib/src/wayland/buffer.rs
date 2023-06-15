@@ -7,7 +7,7 @@ proxy!(Buffer , WlBuffer);
 
 
 #[macro_export]
-macro_rules! delegate_buffer  {
+macro_rules! delegate_wl_buffer {
     ( $name:ident   ) => {
         wayland_client::delegate_dispatch!( $name : [ wayland_client::protocol::wl_buffer::WlBuffer : $crate::wayland::buffer::BufferData]=>$crate::wayland::buffer::Buffer) ;
     };
@@ -15,7 +15,7 @@ macro_rules! delegate_buffer  {
 pub struct BufferData ;
 impl <T : Dispatch<WlBuffer ,BufferData  >  > Dispatch< WlBuffer ,BufferData , T  > for Buffer{
     fn event(state: &mut T, proxy: &WlBuffer, event: wl_buffer::Event, data: &BufferData, conn: &Connection, qhandle: &QueueHandle<T>) {
-        todo!()
+
     }
 }
 

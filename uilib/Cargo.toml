@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 wayland_lib = { path ="../wayland_lib" }
 wayland-client = "0.30.1"
+wayland-egl = "0.30.0"

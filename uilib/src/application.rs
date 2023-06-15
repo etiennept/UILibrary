@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::sync::Arc;
 use wayland_client::Connection;
-use wayland_lib::{delegate_compositor, delegate_registry, delegate_seat, delegate_shm, delegate_wm_base};
+use wayland_lib::{delegate_wl_compositor, delegate_wl_registry, delegate_wl_seat, delegate_wl_shm, delegate_xdg_wm_base};
 use wayland_lib::wayland::compositor::Compositor;
 use wayland_lib::wayland::output::Output;
 use wayland_lib::wayland::registry;
@@ -10,11 +10,11 @@ use wayland_lib::wayland::seat::Seat;
 use wayland_lib::wayland::shm::Shm;
 use wayland_lib::xdg::wm_base::WmBase;
 use crate::application;
+use crate::window::WindowState;
 
 struct ApplicationState{
 
 }
-
 
 
 
@@ -48,10 +48,8 @@ impl Application {
         return application
     }
     fn create_window(&self ){
+        let a = self.connection.new_event_queue::<WindowState>() ;
 
-        let a
-
-        self.compositor.create_surface( )
 
 
     }
@@ -63,8 +61,8 @@ impl Drop for Application {
     }
 }
 
-delegate_registry!(ApplicationState  ) ;
-delegate_shm!(ApplicationState) ;
-delegate_seat!(ApplicationState) ;
-delegate_compositor!(ApplicationState);
-delegate_wm_base!(ApplicationState) ;
+delegate_wl_registry!(ApplicationState  ) ;
+delegate_wl_shm!(ApplicationState) ;
+delegate_wl_seat!(ApplicationState) ;
+delegate_wl_compositor!(ApplicationState);
+delegate_xdg_wm_base!(ApplicationState) ;
