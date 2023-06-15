@@ -28,9 +28,6 @@ impl Dispatch<   > {
 } */
 
 
-unsafe impl Send for KeyboardData {}
-// SAFETY: The state is guarded by a mutex since libxkbcommon has no internal synchronization.
-unsafe impl Sync for KeyboardData {}
 
 #[macro_export]
 macro_rules! delegate_wl_keyboard {
@@ -46,6 +43,10 @@ enum NoKeyMap {
 pub struct KeyboardData {
      state:Mutex<Option<State> > ,
 }
+
+unsafe impl Send for KeyboardData {}
+// SAFETY: The state is guarded by a mutex since libxkbcommon has no internal synchronization.
+unsafe impl Sync for KeyboardData {}
 
 impl KeyboardData {
     pub(crate) fn new () -> KeyboardData {

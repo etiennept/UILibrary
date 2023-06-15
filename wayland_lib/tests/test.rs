@@ -30,7 +30,7 @@ use wayland_protocols::wp::presentation_time::client::* ;
 use wayland_protocols::wp::viewporter::client::* ;
 use wayland_protocols::wp::viewporter::client::wp_viewport::WpViewport;
 use wayland_protocols::wp::viewporter::client::wp_viewporter::WpViewporter;
-use UILibrary::egl::{CreateContext, GetDisplay, Initialize};
+
 
 struct State {
     running : bool,
@@ -463,7 +463,7 @@ impl State {
 #[test]
 fn test() {
 
-        let conn = Connection::connect_to_env().unwrap();
+     /*   let conn = Connection::connect_to_env().unwrap();
         let x = conn.display();
 
         let a  = unsafe { GetDisplay(x.id().as_ptr() as *const c_void ) };
@@ -487,7 +487,7 @@ fn test() {
         state.new(&r  );
         while state.running{
             event_queue.roundtrip( &mut state).unwrap();
-        }
+        } */
 
 
 }

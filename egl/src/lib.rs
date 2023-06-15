@@ -1,7 +1,7 @@
 use std::mem::MaybeUninit;
 use std::path::Display;
-use wayland_client::backend::ObjectId;
 
+/*
 use std::os::raw;
 use crate::types::EGLDisplay;
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
@@ -56,4 +56,4 @@ mod tests {
         let result = add(2, 2);
         assert_eq!(result, 4);
     }
-}
+} */

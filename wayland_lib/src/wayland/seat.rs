@@ -10,7 +10,7 @@ use wayland_client::protocol::wl_seat;
 use wayland_client::protocol::wl_seat::{Capability, WlSeat};
 use wayland_client::protocol::wl_touch::WlTouch;
 use crate::proxy;
-use crate::wayland::keyboard::Keyboard;
+use crate::wayland::keyboard::{Keyboard , KeyboardData };
 use crate::wayland::pointer::{Pointer, PointerData};
 use crate::wayland::registry::Registry;
 use crate::wayland::seat::SeatError::NotImpl;
@@ -60,10 +60,10 @@ impl Error for SeatError{
 }
 
 macro_rules! seat_impl {
-    ( $name:ident , $ty:ident,  $wl_ty:ty,  $data_name:ident    ,  $arg_data_name:ident  ) => {
+    ( $name:ident , $ty:ident,  $wl_ty:ty,  $data_name:tt    ,  $arg_data_name:ident  ) => {
         pub fn $name < T : Dispatch< $wl_ty  , $data_name   >+'static   >(&self , qt : &QueueHandle<T> ,    ) ->  Result<$ ty , SeatError>{
             if self.ptr.data::<SeatData>().unwrap().contain.lock().unwrap().$arg_data_name {
-                Ok( $ty::from_proxy( self.ptr.$name (qt  ,  $data::new() )  )  )
+                Ok( $ty::from_proxy( self.ptr.$name (qt  ,  $data_name::new() )  )  )
             }else {
                 Err(NotImpl)
             }
@@ -80,9 +80,10 @@ impl Seat {
     pub fn new < T : Dispatch<WlSeat, SeatData> + 'static> (registry : &Registry, qh : &QueueHandle<T > ) -> Result<Seat, BindError> {
         registry.bind( qh,   SeatData::new()    )
     }
-    seat_impl!(get_keyboard , Keyboard, WlKeyboard , KeyboardData   ,  keyboard     ) ;
+
     seat_impl!(get_pointer, Pointer , WlPointer , PointerData,   pointer  ) ;
-    seat_impl!(get_touch, Touch ,WlTouch , TouchData , touch ) ;
+    seat_impl!(get_keyboard , Keyboard, WlKeyboard , KeyboardData,  keyboard     ) ;
+    seat_impl!(get_touch, Touch ,WlTouch , TouchData , touch  ) ;
 }
 
 impl <T : Dispatch<WlSeat ,SeatData  >>  Dispatch<WlSeat, SeatData , T  > for Seat {

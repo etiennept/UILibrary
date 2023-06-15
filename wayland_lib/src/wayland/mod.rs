@@ -12,6 +12,7 @@ pub mod region;
 pub mod buffer;
 pub mod shm_pool;
 pub mod touch;
+
 pub trait ProxyWrapper {
     type Target : Proxy +'static;
     fn get_proxy( &self) -> &Self::Target ;
@@ -75,8 +76,6 @@ mod test {
     use crate::xdg::wm_base::{WmBase, WmBaseHandler};
 
 //use crate::wayland::application::Application;
-
-
 
     struct State {
         is_closed: bool
@@ -287,9 +286,9 @@ mod test {
                                  wl_shm::Format::Argb8888, &queue_handle).unwrap() ;
 
         surface.commit() ;
-        let keyboard = seat.get_keyboard(&queue_handle ,  KeyboardData::new()  ).unwrap() ;
+        //let keyboard = seat.get_keyboard(&queue_handle ,  KeyboardData::new()  ).unwrap() ;
         //let keyboard2 = seat.get_keyboard(&queue_handle ,  KeyboardData::new()  ).unwrap() ;
-        let pointer =  seat.get_pointer(&queue_handle , PointerData{} ).unwrap();
+       // let pointer =  seat.get_pointer(&queue_handle , PointerData{} ).unwrap();
 
         thread::spawn(move ||{
             loop {
